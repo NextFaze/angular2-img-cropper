@@ -50,6 +50,8 @@ export class CropperSettings implements ICropperSettings {
     public preserveSize: boolean = false;
 
     public compressRatio:number = 1.0;
+    // percentage
+    public rotation: number = 0;
 
     private _rounded: boolean = false;
     private _keepAspect: boolean = true;

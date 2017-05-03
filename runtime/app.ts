@@ -188,15 +188,14 @@ export class AppComponent extends Type {
 
     constructor() {
         super();
-
         this.cropperSettings1 = new CropperSettings();
         this.cropperSettings1.dynamicSizing = true;
         this.cropperSettings1.cropperClass = 'custom-class';
         this.cropperSettings1.croppingClass = 'cropping';
-        this.cropperSettings1.width = 200;
+        this.cropperSettings1.width = 100;
         this.cropperSettings1.height = 200;
 
-        this.cropperSettings1.croppedWidth = 200;
+        this.cropperSettings1.croppedWidth = 100;
         this.cropperSettings1.croppedHeight = 200;
 
         this.cropperSettings1.canvasWidth = 500;
@@ -206,6 +205,7 @@ export class AppComponent extends Type {
         this.cropperSettings1.minHeight = 100;
 
         this.cropperSettings1.rounded = false;
+        this.cropperSettings1.rotation = 90;
 
         this.cropperSettings1.cropperDrawSettings.strokeColor = 'rgba(255,255,255,1)';
         this.cropperSettings1.cropperDrawSettings.strokeWidth = 2;
@@ -316,6 +316,10 @@ export class AppComponent extends Type {
         }
 
 
+        let image = new Image();
+        image.crossOrigin = 'Anonymous';
+        image.src = 'https://unsplash.it/400/300';
+        image.onload = () => this.cropper1.setImage(image);
     }
 
 

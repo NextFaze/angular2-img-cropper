@@ -183,30 +183,64 @@ export class ImageCropper extends ImageCropperModel {
         this.setImage(undefined);
     }
 
+    private setupRotation(ctx:CanvasRenderingContext2D, draw:Function) {
+        ctx.save();
+        ctx.translate(ctx.canvas.width/2, ctx.canvas.height/2);
+        ctx.rotate(this.cropperSettings.rotation * Math.PI/180);
+        ctx.translate(-ctx.canvas.height/2, -ctx.canvas.width/2);
+        draw();
+        ctx.restore();
+    }
+
+    private get rotated():boolean {
+        return this.cropperSettings.rotation % 180 !== 0;
+    }
+
     public draw(ctx:CanvasRenderingContext2D):void {
         let bounds:Bounds = this.getBounds();
-        if (this.srcImage) {
-            ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+        if (this.srcImage) { 
             let sourceAspect:number = this.srcImage.height / this.srcImage.width;
             let canvasAspect:number = this.canvasHeight / this.canvasWidth;
+
             let w:number = this.canvasWidth;
             let h:number = this.canvasHeight;
             if (canvasAspect > sourceAspect) {
-                w = this.canvasWidth;
-                h = this.canvasWidth * sourceAspect;
+                if(this.rotated) {
+                    h = this.canvasWidth;
+                    w = this.canvasHeight / sourceAspect;
+                } else {
+                    w = this.canvasWidth;
+                    h = this.canvasWidth * sourceAspect;
+                }
             } else {
-                h = this.canvasHeight;
-                w = this.canvasHeight / sourceAspect;
+                if(this.rotated) {
+                    w = this.canvasHeight;
+                    h = this.canvasHeight * sourceAspect;
+                } else {
+                    h = this.canvasHeight;
+                    w = this.canvasHeight / sourceAspect;
+                }
             }
             this.ratioW = w / this.srcImage.width;
             this.ratioH = h / this.srcImage.height;
-            if (canvasAspect < sourceAspect) {
-                this.drawImageIOSFix(ctx, this.srcImage, 0, 0, this.srcImage.width, this.srcImage.height,
-                    this.buffer.width / 2 - w / 2, 0, w, h);
-            } else {
+            ctx.save();
+            ctx.translate(ctx.canvas.width/2, ctx.canvas.height/2);
+            ctx.rotate(this.cropperSettings.rotation * Math.PI/180);
+            ctx.translate(-ctx.canvas.height/2, -ctx.canvas.width/2);
+            if (canvasAspect < sourceAspect) { // source is taller than the canvas
+                if(this.rotated) {
+                    this.drawImageIOSFix(ctx, this.srcImage, 0, 0, this.srcImage.width, this.srcImage.height,
+                        0, this.canvasWidth/2 - h/2, w, h);
+                } else {
+                    this.drawImageIOSFix(ctx, this.srcImage, 0, 0, this.srcImage.width, this.srcImage.height,
+                        this.buffer.width / 2 - w / 2, 0, w, h);
+
+                }
+            } else { // canvas is taller than the source
                 this.drawImageIOSFix(ctx, this.srcImage, 0, 0, this.srcImage.width, this.srcImage.height, 0,
                     this.buffer.height / 2 - h / 2, w, h);
             }
+            ctx.restore();
             (<CanvasRenderingContext2D> this.buffer.getContext('2d'))
                 .drawImage(this.canvas, 0, 0, this.canvasWidth, this.canvasHeight);
 
